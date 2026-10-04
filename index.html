@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>نظام إدارة عيادات د. أحمد حمدي</title>
+  <title>نظام إدارة عيادات د. أحمد حمدي والمالية الشامل</title>
   <style>
     :root {
       --primary-cyan: #00a2c7;
@@ -41,16 +41,18 @@
     .tab-content { display: none; }
     .tab-content.active { display: block; }
 
-    .kpi-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; margin-bottom: 25px; }
-    .kpi-card { background-color: var(--card-bg); padding: 20px; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); border-top: 4px solid var(--primary-cyan); }
+    .kpi-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 15px; margin-bottom: 25px; }
+    .kpi-card { background-color: var(--card-bg); padding: 18px; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); border-top: 4px solid var(--primary-cyan); }
     .kpi-card.gold { border-top-color: var(--accent-gold); }
-    .kpi-title { font-size: 14px; color: var(--text-muted); margin-bottom: 8px; }
-    .kpi-value { font-size: 28px; font-weight: bold; color: var(--primary-cyan-dark); }
+    .kpi-card.red { border-top-color: #dc3545; }
+    .kpi-card.green { border-top-color: #28a745; }
+    .kpi-title { font-size: 13px; color: var(--text-muted); margin-bottom: 6px; }
+    .kpi-value { font-size: 24px; font-weight: bold; color: var(--primary-cyan-dark); }
 
     .card { background-color: var(--card-bg); border-radius: 12px; padding: 20px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); margin-bottom: 25px; border: 1px solid var(--border-color); }
     .card-header { font-size: 18px; font-weight: bold; color: var(--primary-cyan-dark); padding-bottom: 12px; margin-bottom: 15px; border-bottom: 2px solid var(--primary-cyan-light); display: flex; justify-content: space-between; align-items: center; }
 
-    .form-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 15px; }
+    .form-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; }
     .form-group { display: flex; flex-direction: column; gap: 6px; }
     .form-group label { font-size: 13px; font-weight: 600; color: var(--text-main); }
     .form-group input, .form-group select, .form-group textarea { padding: 10px; border: 1px solid var(--border-color); border-radius: 6px; font-size: 14px; }
@@ -61,6 +63,7 @@
     .btn-gold { background-color: var(--accent-gold); color: white; }
     .btn-gold:hover { background-color: var(--accent-gold-dark); }
     .btn-danger { background-color: #dc3545; color: white; }
+    .btn-edit { background-color: #f39c12; color: white; padding: 5px 10px; font-size: 12px; border-radius: 4px; border: none; cursor: pointer; }
 
     table { width: 100%; border-collapse: collapse; margin-top: 10px; }
     th { background-color: var(--primary-cyan-light); color: var(--primary-cyan-dark); padding: 12px; text-align: right; font-size: 13px; }
@@ -80,6 +83,8 @@
 
     .preset-badge { background: var(--primary-cyan-light); color: var(--primary-cyan-dark); padding: 8px 12px; border-radius: 6px; cursor: pointer; border: 1px solid var(--primary-cyan); font-weight: bold; transition: 0.2s; font-size: 13px; display: inline-block; margin: 4px; }
     .preset-badge:hover { background: var(--primary-cyan); color: white; }
+
+    .operation-box { background: var(--accent-gold-light); border: 1px solid var(--accent-gold); padding: 15px; border-radius: 8px; margin-top: 10px; display: none; }
 
     @media print {
       body * { visibility: hidden; }
@@ -102,7 +107,7 @@
         <p>استشاري الصحة الجنسية وجراحات الذكورة والعقم</p>
       </div>
     </div>
-    <div><strong>نظام إدارة العيادات والمراكز الجراحية</strong></div>
+    <div><strong>نظام إدارة العيادات والمراكز الجراحية والمالية</strong></div>
   </header>
 
   <div class="branch-bar">
@@ -117,37 +122,47 @@
       <button class="nav-btn active" onclick="switchTab('reception')">📌 الاستقبال والانتظار</button>
       <button class="nav-btn" onclick="switchTab('doctor')">👨‍⚕️ كشف الطبيب والروشتة</button>
       <button class="nav-btn" onclick="switchTab('surgeries')">🏥 إدارة وتنسيق العمليات</button>
+      <button class="nav-btn" onclick="switchTab('financials')">💵 إدارة الأموال والمصروفات</button>
       <button class="nav-btn" onclick="switchTab('database')">🗄️ قاعدة بيانات المرضى الشاملة</button>
     </aside>
 
     <main>
-      <!-- KPIs -->
+      <!-- KPIs الإحصائيات الشاملة والمالية -->
       <div class="kpi-grid">
         <div class="kpi-card">
           <div class="kpi-title">مرضى اليوم بالفرع</div>
           <div class="kpi-value" id="kpi-total">0</div>
         </div>
         <div class="kpi-card gold">
-          <div class="kpi-title">حالات الانتظار</div>
-          <div class="kpi-value" id="kpi-waiting">0</div>
-        </div>
-        <div class="kpi-card">
-          <div class="kpi-title">إجمالي قاعدة البيانات</div>
-          <div class="kpi-value" id="kpi-db-total">0</div>
+          <div class="kpi-title">الكشوفات (500ج)</div>
+          <div class="kpi-value" id="kpi-kashf-count">0</div>
         </div>
         <div class="kpi-card gold">
-          <div class="kpi-title">طلبات العمليات</div>
-          <div class="kpi-value" id="kpi-surgeries">0</div>
+          <div class="kpi-title">الاستشارات (200ج)</div>
+          <div class="kpi-value" id="kpi-esteshara-count">0</div>
+        </div>
+        <div class="kpi-card green">
+          <div class="kpi-title">إجمالي الإيرادات</div>
+          <div class="kpi-value" id="kpi-income">0 ج.م</div>
+        </div>
+        <div class="kpi-card red">
+          <div class="kpi-title">إجمالي المصروفات</div>
+          <div class="kpi-value" id="kpi-expenses">0 ج.م</div>
+        </div>
+        <div class="kpi-card green">
+          <div class="kpi-title">صافي الأرباح</div>
+          <div class="kpi-value" id="kpi-net-profit">0 ج.م</div>
         </div>
       </div>
 
       <!-- Tab 1: Reception -->
       <div id="reception" class="tab-content active">
         <div class="card">
-          <div class="card-header">تسجيل مريض جديد بالحجز</div>
-          <form id="patient-form" onsubmit="addPatient(event)">
+          <div class="card-header" id="patient-form-title">تسجيل مريض جديد بالحجز</div>
+          <form id="patient-form" onsubmit="savePatient(event)">
+            <input type="hidden" id="p-edit-id" value="">
             <div class="form-grid">
-              <div class="form-group"><label>الاسم بالكامل</label><input type="text" id="p-name" required></div>
+              <div class="form-group"><label>الاسم بالكامل *</label><input type="text" id="p-name" required></div>
               <div class="form-group"><label>السن</label><input type="number" id="p-age" required></div>
               <div class="form-group"><label>مدينة الإقامة</label><input type="text" id="p-city" required></div>
               <div class="form-group"><label>رقم التليفون</label><input type="tel" id="p-phone" required></div>
@@ -174,12 +189,39 @@
                 <input type="date" id="p-date" required>
               </div>
               <div class="form-group">
-                <label>نوع الحجز</label>
-                <select id="p-type"><option>كشف جديد</option><option>استشارة</option></select>
+                <label>نوع الحجز والرسوم</label>
+                <select id="p-type" onchange="toggleOperationInputs()">
+                  <option value="كشف جديد">كشف جديد (500 ج.م)</option>
+                  <option value="استشارة">استشارة (200 ج.م)</option>
+                  <option value="عملية جراحية">عملية جراحية (مبلغ يدوي)</option>
+                </select>
               </div>
             </div>
+
+            <!-- تفاصيل ماليات العملية الجراحية (تظهر عند اختيار عملية جراحية) -->
+            <div id="operation-inputs" class="operation-box">
+              <h4 style="color: var(--accent-gold-dark); margin-bottom: 10px;">💰 تفاصيل تكلفة العملية والعربون:</h4>
+              <div class="form-grid">
+                <div class="form-group">
+                  <label>تكلفة العملية الكلية (ج.م)</label>
+                  <input type="number" id="p-op-total" oninput="calculateOpRemaining()" placeholder="أدخل تكلفة العملية">
+                </div>
+                <div class="form-group">
+                  <label>عربون العملية المدفوع (ج.م)</label>
+                  <input type="number" id="p-op-deposit" oninput="calculateOpRemaining()" placeholder="المبلغ المدفوع حجز">
+                </div>
+                <div class="form-group">
+                  <label>المتبقي قبل العملية (ج.م)</label>
+                  <input type="number" id="p-op-remaining" readonly style="background: #eee; font-weight: bold; color: #dc3545;" value="0">
+                </div>
+              </div>
+            </div>
+
             <br>
-            <button type="submit" class="btn btn-primary">إضافة لقائمة الانتظار وقاعدة البيانات</button>
+            <div style="display:flex; gap: 10px;">
+              <button type="submit" id="p-submit-btn" class="btn btn-primary">إضافة لقائمة الانتظار وقاعدة البيانات</button>
+              <button type="button" id="p-cancel-btn" class="btn btn-danger" style="display:none;" onclick="cancelEditPatient()">إلغاء التعديل</button>
+            </div>
           </form>
         </div>
 
@@ -188,12 +230,13 @@
           <table>
             <thead>
               <tr>
-                <th>الدور</th>
+                <th>م المسلسل</th>
+                <th>كود المريض (ID)</th>
                 <th>الاسم</th>
                 <th>السن</th>
                 <th>الهاتف</th>
                 <th>النوع</th>
-                <th>طريقة التعرف</th>
+                <th>المدفوع</th>
                 <th>الحالة</th>
                 <th>إجراءات</th>
               </tr>
@@ -243,6 +286,7 @@
                 <p>استشاري الصحة الجنسية وجراحات الذكورة والعقم</p>
               </div>
               <div style="text-align: left;">
+                <p><strong>كود المريض (ID):</strong> <span id="rx-patient-id" style="font-weight:bold; color:var(--primary-cyan-dark);">---</span></p>
                 <p><strong>التاريخ:</strong> <span id="rx-date"></span></p>
                 <p><strong>المريض:</strong> <span id="rx-patient-name">---</span></p>
               </div>
@@ -293,6 +337,7 @@
               </div>
               <div style="text-align: left;">
                 <p><strong>استمارة طلب تحاليل وفحوصات (Laboratory Request)</strong></p>
+                <p><strong>كود المريض (ID):</strong> <span id="lab-patient-id">---</span></p>
                 <p><strong>المريض:</strong> <span id="lab-patient-name">---</span></p>
               </div>
             </div>
@@ -334,7 +379,47 @@
         </div>
       </div>
 
-      <!-- Tab 4: Patients Database -->
+      <!-- Tab 4: Financials & Expenses (إدارة المصروفات والأموال) -->
+      <div id="financials" class="tab-content">
+        <div class="card">
+          <div class="card-header">تسجيل المصروفات اليومية والبنود</div>
+          <form id="expense-form" onsubmit="addExpense(event)">
+            <div class="form-grid">
+              <div class="form-group">
+                <label>بيان المصروف / البند *</label>
+                <input type="text" id="exp-title" placeholder="مثال: مستلزمات طبية، كهرباء، صيانة..." required>
+              </div>
+              <div class="form-group">
+                <label>المبلغ (ج.م) *</label>
+                <input type="number" id="exp-amount" placeholder="0.00" required>
+              </div>
+              <div class="form-group">
+                <label>تاريخ المصروف *</label>
+                <input type="date" id="exp-date" required>
+              </div>
+            </div>
+            <br>
+            <button type="submit" class="btn btn-danger">تسجيل المصروف</button>
+          </form>
+        </div>
+
+        <div class="card">
+          <div class="card-header">سجل المصروفات المسجلة</div>
+          <table>
+            <thead>
+              <tr>
+                <th>التاريخ</th>
+                <th>البند / بيان المصروف</th>
+                <th>الفرع</th>
+                <th>المبلغ (ج.م)</th>
+              </tr>
+            </thead>
+            <tbody id="expenses-table-body"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Tab 5: Patients Database -->
       <div id="database" class="tab-content">
         <div class="card">
           <div class="card-header">🗄️ قاعدة بيانات المرضى الشاملة والبحث المتقدم</div>
@@ -379,7 +464,7 @@
             </div>
 
             <div class="filter-item" style="flex: 1;">
-              <label>بحث باسم المريض أو الهاتف</label>
+              <label>بحث باسم المريض، كود الـ ID، أو الهاتف</label>
               <input type="text" id="db-search-input" placeholder="اكتب للبحث السريع..." onkeyup="renderDatabaseTable()">
             </div>
           </div>
@@ -387,16 +472,17 @@
           <table>
             <thead>
               <tr>
+                <th>كود (ID)</th>
                 <th>التاريخ</th>
                 <th>اسم المريض</th>
                 <th>السن</th>
                 <th>الإقامة</th>
                 <th>الهاتف</th>
                 <th>الفرع</th>
-                <th>الحالة الاجتماعية</th>
-                <th>الزواج</th>
-                <th>الأبناء</th>
-                <th>المصدر</th>
+                <th>نوع الحجز</th>
+                <th>المدفوع</th>
+                <th>المتبقي</th>
+                <th>إجراءات</th>
               </tr>
             </thead>
             <tbody id="db-table-body"></tbody>
@@ -414,18 +500,19 @@
       databaseURL: "https://clinic-system-ac0fe-default-rtdb.firebaseio.com"
     };
 
-    // تهيئة تطبيق Firebase
     if (!firebase.apps.length) {
       firebase.initializeApp(firebaseConfig);
     }
     const db = firebase.database();
     const patientsRef = db.ref("patients");
     const surgeriesRef = db.ref("surgeries");
+    const expensesRef = db.ref("expenses");
 
     // Variables
     let currentBranch = 'محطة الرمل';
     let patients = [];
     let surgeries = [];
+    let expenses = [];
     let rxItems = [];
 
     const presets = {
@@ -452,6 +539,7 @@
 
     const todayStr = new Date().toISOString().split('T')[0];
     document.getElementById('p-date').value = todayStr;
+    document.getElementById('exp-date').value = todayStr;
     document.getElementById('rx-date').innerText = new Date().toLocaleDateString('ar-EG');
 
     // -------------------------------------------------------------
@@ -468,6 +556,7 @@
       renderQueue();
       renderDatabaseTable();
       updateDoctorSelects();
+      calculateFinancials();
     });
 
     surgeriesRef.on('value', (snapshot) => {
@@ -479,17 +568,29 @@
         });
       }
       renderSurgeries();
-      renderQueue();
+    });
+
+    expensesRef.on('value', (snapshot) => {
+      const data = snapshot.val();
+      expenses = [];
+      if (data) {
+        Object.keys(data).forEach(key => {
+          expenses.push({ id: key, ...data[key] });
+        });
+      }
+      renderExpensesTable();
+      calculateFinancials();
     });
 
     // -------------------------------------------------------------
-    // الوظائف الرئيسية للتطبيق
+    // الوظائف والعمليات الرئيسية
     // -------------------------------------------------------------
     function setBranch(branch, btn) {
       currentBranch = branch;
       document.querySelectorAll('.branch-btn').forEach(b => b.classList.remove('active'));
       btn.classList.add('active');
       renderQueue();
+      calculateFinancials();
     }
 
     function switchTab(tabId) {
@@ -503,9 +604,42 @@
       if(tabId === 'database') renderDatabaseTable();
     }
 
-    function addPatient(e) {
+    function toggleOperationInputs() {
+      const type = document.getElementById('p-type').value;
+      const opBox = document.getElementById('operation-inputs');
+      if (type === 'عملية جراحية') {
+        opBox.style.display = 'block';
+      } else {
+        opBox.style.display = 'none';
+      }
+    }
+
+    function calculateOpRemaining() {
+      const total = parseFloat(document.getElementById('p-op-total').value) || 0;
+      const deposit = parseFloat(document.getElementById('p-op-deposit').value) || 0;
+      document.getElementById('p-op-remaining').value = Math.max(0, total - deposit);
+    }
+
+    function savePatient(e) {
       e.preventDefault();
-      const newP = {
+      const editKey = document.getElementById('p-edit-id').value;
+      const type = document.getElementById('p-type').value;
+
+      let paid = 0;
+      let remaining = 0;
+      let totalCost = 0;
+
+      if (type === 'كشف جديد') {
+        paid = 500;
+      } else if (type === 'استشارة') {
+        paid = 200;
+      } else if (type === 'عملية جراحية') {
+        totalCost = parseFloat(document.getElementById('p-op-total').value) || 0;
+        paid = parseFloat(document.getElementById('p-op-deposit').value) || 0;
+        remaining = Math.max(0, totalCost - paid);
+      }
+
+      const pData = {
         name: document.getElementById('p-name').value,
         age: document.getElementById('p-age').value,
         city: document.getElementById('p-city').value,
@@ -517,19 +651,114 @@
         children: document.getElementById('p-children').value || 0,
         smoking: document.getElementById('p-smoking').value,
         source: document.getElementById('p-source').value,
-        type: document.getElementById('p-type').value,
+        type: type,
         status: "في الانتظار",
-        date: document.getElementById('p-date').value
+        date: document.getElementById('p-date').value,
+        paid: paid,
+        remaining: remaining,
+        totalCost: totalCost
       };
 
-      // الحفظ المباشر في Firebase
-      patientsRef.push(newP)
+      if (editKey) {
+        // تعديل بيانات المريض
+        patientsRef.child(editKey).update(pData)
+          .then(() => {
+            alert('تم تعديل بيانات المريض بنجاح!');
+            cancelEditPatient();
+          })
+          .catch(err => alert('خطأ في التعديل: ' + err.message));
+      } else {
+        // إضافة مريض جديد بكود فريد تلقائي
+        const customCode = 'PAT-' + (1000 + patients.length + 1);
+        pData.patientCode = customCode;
+
+        patientsRef.push(pData)
+          .then(() => {
+            alert('تم إضافة المريض وتوليد كود ' + customCode + ' بنجاح!');
+            cancelEditPatient();
+          })
+          .catch(err => alert('حدث خطأ أثناء الحفظ: ' + err.message));
+      }
+    }
+
+    function editPatientData(id) {
+      const p = patients.find(item => item.id === id);
+      if (!p) return;
+
+      document.getElementById('p-edit-id').value = p.id;
+      document.getElementById('p-name').value = p.name;
+      document.getElementById('p-age').value = p.age;
+      document.getElementById('p-city').value = p.city;
+      document.getElementById('p-phone').value = p.phone;
+      document.getElementById('p-marital').value = p.marital;
+      document.getElementById('p-marriage-duration').value = p.marriageDur;
+      document.getElementById('p-wife-age').value = p.wifeAge;
+      document.getElementById('p-children').value = p.children;
+      document.getElementById('p-smoking').value = p.smoking;
+      document.getElementById('p-source').value = p.source;
+      document.getElementById('p-date').value = p.date;
+      document.getElementById('p-type').value = p.type;
+
+      toggleOperationInputs();
+
+      if (p.type === 'عملية جراحية') {
+        document.getElementById('p-op-total').value = p.totalCost || 0;
+        document.getElementById('p-op-deposit').value = p.paid || 0;
+        document.getElementById('p-op-remaining').value = p.remaining || 0;
+      }
+
+      document.getElementById('patient-form-title').innerText = 'تعديل بيانات المريض (' + (p.patientCode || p.id) + ')';
+      document.getElementById('p-submit-btn').innerText = 'حفظ التعديلات';
+      document.getElementById('p-cancel-btn').style.display = 'inline-block';
+
+      switchTab('reception');
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    function cancelEditPatient() {
+      document.getElementById('patient-form').reset();
+      document.getElementById('p-edit-id').value = '';
+      document.getElementById('p-date').value = todayStr;
+      document.getElementById('patient-form-title').innerText = 'تسجيل مريض جديد بالحجز';
+      document.getElementById('p-submit-btn').innerText = 'إضافة لقائمة الانتظار وقاعدة البيانات';
+      document.getElementById('p-cancel-btn').style.display = 'none';
+      toggleOperationInputs();
+    }
+
+    function addExpense(e) {
+      e.preventDefault();
+      const expData = {
+        title: document.getElementById('exp-title').value,
+        amount: parseFloat(document.getElementById('exp-amount').value) || 0,
+        date: document.getElementById('exp-date').value,
+        branch: currentBranch
+      };
+
+      expensesRef.push(expData)
         .then(() => {
-          document.getElementById('patient-form').reset();
-          document.getElementById('p-date').value = todayStr;
-          alert('تم إضافة المريض بنجاح إلى Firebase!');
+          document.getElementById('expense-form').reset();
+          document.getElementById('exp-date').value = todayStr;
+          alert('تم تسجيل المصروف بنجاح!');
         })
-        .catch(err => alert('حدث خطأ أثناء الحفظ: ' + err.message));
+        .catch(err => alert('خطأ في التسجيل: ' + err.message));
+    }
+
+    function calculateFinancials() {
+      const filteredP = patients.filter(p => p.branch === currentBranch);
+      const filteredE = expenses.filter(e => e.branch === currentBranch);
+
+      const kashfCount = filteredP.filter(p => p.type === 'كشف جديد').length;
+      const estesharaCount = filteredP.filter(p => p.type === 'استشارة').length;
+
+      const totalIncome = filteredP.reduce((sum, p) => sum + (p.paid || 0), 0);
+      const totalExpenses = filteredE.reduce((sum, e) => sum + (e.amount || 0), 0);
+      const netProfit = totalIncome - totalExpenses;
+
+      document.getElementById('kpi-kashf-count').innerText = kashfCount;
+      document.getElementById('kpi-esteshara-count').innerText = estesharaCount;
+      document.getElementById('kpi-income').innerText = totalIncome.toLocaleString() + ' ج.م';
+      document.getElementById('kpi-expenses').innerText = totalExpenses.toLocaleString() + ' ج.م';
+      document.getElementById('kpi-net-profit').innerText = netProfit.toLocaleString() + ' ج.م';
     }
 
     function renderQueue() {
@@ -541,23 +770,38 @@
         tbody.innerHTML += `
           <tr>
             <td><strong>${index + 1}</strong></td>
+            <td><strong style="color:var(--primary-cyan-dark);">${p.patientCode || 'PAT-' + (1000 + index + 1)}</strong></td>
             <td>${p.name}</td>
             <td>${p.age}</td>
             <td>${p.phone}</td>
             <td>${p.type}</td>
-            <td>${p.source}</td>
+            <td><strong style="color: #28a745;">${p.paid ? p.paid + ' ج.م' : '0'}</strong></td>
             <td><span style="color: var(--primary-cyan-dark); font-weight: bold;">${p.status}</span></td>
             <td>
               <button class="btn btn-primary" style="padding: 4px 8px; font-size: 12px;" onclick="switchTab('doctor')">دخول العيادة</button>
+              <button class="btn-edit" onclick="editPatientData('${p.id}')">تعديل</button>
             </td>
           </tr>
         `;
       });
 
       document.getElementById('kpi-total').innerText = filtered.length;
-      document.getElementById('kpi-waiting').innerText = filtered.filter(p => p.status === 'في الانتظار').length;
-      document.getElementById('kpi-db-total').innerText = patients.length;
-      document.getElementById('kpi-surgeries').innerText = surgeries.length;
+    }
+
+    function renderExpensesTable() {
+      const filtered = expenses.filter(e => e.branch === currentBranch);
+      const tbody = document.getElementById('expenses-table-body');
+      tbody.innerHTML = '';
+      filtered.forEach(e => {
+        tbody.innerHTML += `
+          <tr>
+            <td>${e.date}</td>
+            <td><strong>${e.title}</strong></td>
+            <td>${e.branch}</td>
+            <td><strong style="color: #dc3545;">${e.amount} ج.م</strong></td>
+          </tr>
+        `;
+      });
     }
 
     function renderDatabaseTable() {
@@ -577,24 +821,28 @@
         const matchYear = (year === 'ALL' || pYear === year);
         const matchMonth = (month === 'ALL' || pMonth === month);
         const matchBranch = (branch === 'ALL' || p.branch === branch);
-        const matchSearch = p.name.toLowerCase().includes(search) || p.phone.includes(search);
+        const code = (p.patientCode || '').toLowerCase();
+        const matchSearch = p.name.toLowerCase().includes(search) || p.phone.includes(search) || code.includes(search);
 
         return matchYear && matchMonth && matchBranch && matchSearch;
       });
 
-      filtered.forEach(p => {
+      filtered.forEach((p, idx) => {
         tbody.innerHTML += `
           <tr>
+            <td><strong>${p.patientCode || 'PAT-' + (1000 + idx + 1)}</strong></td>
             <td>${p.date}</td>
             <td><strong>${p.name}</strong></td>
             <td>${p.age}</td>
             <td>${p.city}</td>
             <td>${p.phone}</td>
             <td>${p.branch}</td>
-            <td>${p.marital}</td>
-            <td>${p.marriageDur}</td>
-            <td>${p.children}</td>
-            <td>${p.source}</td>
+            <td>${p.type}</td>
+            <td><strong style="color: #28a745;">${p.paid || 0} ج.م</strong></td>
+            <td><strong style="color: #dc3545;">${p.remaining || 0} ج.م</strong></td>
+            <td>
+              <button class="btn-edit" onclick="editPatientData('${p.id}')">تعديل البيانات</button>
+            </td>
           </tr>
         `;
       });
@@ -607,8 +855,9 @@
       surgSel.innerHTML = '<option value="">-- اختر مريض --</option>';
 
       patients.forEach(p => {
-        docSel.innerHTML += `<option value="${p.id}">${p.name} (${p.branch})</option>`;
-        surgSel.innerHTML += `<option value="${p.name}">${p.name}</option>`;
+        const code = p.patientCode || '';
+        docSel.innerHTML += `<option value="${p.id}">${p.name} (${code}) - ${p.branch}</option>`;
+        surgSel.innerHTML += `<option value="${p.name}">${p.name} (${code})</option>`;
       });
     }
 
@@ -617,7 +866,9 @@
       const patient = patients.find(p => p.id == pId);
       if(patient) {
         document.getElementById('rx-patient-name').innerText = patient.name;
+        document.getElementById('rx-patient-id').innerText = patient.patientCode || patient.id;
         document.getElementById('lab-patient-name').innerText = patient.name;
+        document.getElementById('lab-patient-id').innerText = patient.patientCode || patient.id;
       }
     }
 
