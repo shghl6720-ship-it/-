@@ -1,0 +1,665 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>نظام إدارة عيادات د. أحمد حمدي</title>
+  <style>
+    :root {
+      --primary-cyan: #00a2c7;
+      --primary-cyan-dark: #0082a0;
+      --primary-cyan-light: #e6f6f9;
+      --accent-gold: #d9a128;
+      --accent-gold-dark: #b8861b;
+      --accent-gold-light: #fdf8eb;
+      --bg-gray: #f4f7f8;
+      --card-bg: #ffffff;
+      --text-main: #2b303a;
+      --text-muted: #6c757d;
+      --border-color: #dce5e7;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+    body { background-color: var(--bg-gray); color: var(--text-main); display: flex; flex-direction: column; min-height: 100vh; }
+
+    header { background: linear-gradient(135deg, var(--primary-cyan) 0%, var(--primary-cyan-dark) 100%); color: white; padding: 15px 30px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
+    .logo-container { display: flex; align-items: center; gap: 15px; }
+    .logo-circle { width: 50px; height: 50px; background-color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; border: 3px solid var(--accent-gold); font-weight: bold; color: var(--primary-cyan); font-size: 24px; }
+    .brand-title h1 { font-size: 20px; color: #fff; }
+    .brand-title p { font-size: 13px; color: var(--accent-gold-light); }
+
+    .branch-bar { background-color: var(--card-bg); padding: 12px 30px; border-bottom: 2px solid var(--border-color); display: flex; gap: 15px; align-items: center; }
+    .branch-btn { padding: 8px 18px; border: 2px solid var(--primary-cyan); background-color: white; color: var(--primary-cyan); font-weight: bold; border-radius: 20px; cursor: pointer; transition: all 0.3s; }
+    .branch-btn.active, .branch-btn:hover { background-color: var(--primary-cyan); color: white; }
+
+    .main-layout { display: flex; flex: 1; }
+    aside { width: 260px; background-color: var(--card-bg); border-left: 1px solid var(--border-color); padding: 20px 10px; }
+    .nav-btn { width: 100%; text-align: right; padding: 12px 15px; margin-bottom: 8px; border: none; background: transparent; color: var(--text-main); font-weight: 600; border-radius: 8px; cursor: pointer; display: flex; align-items: center; gap: 10px; transition: 0.2s; }
+    .nav-btn.active { background-color: var(--primary-cyan-light); color: var(--primary-cyan-dark); border-right: 4px solid var(--accent-gold); }
+
+    main { flex: 1; padding: 25px; overflow-y: auto; }
+    .tab-content { display: none; }
+    .tab-content.active { display: block; }
+
+    .kpi-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; margin-bottom: 25px; }
+    .kpi-card { background-color: var(--card-bg); padding: 20px; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); border-top: 4px solid var(--primary-cyan); }
+    .kpi-card.gold { border-top-color: var(--accent-gold); }
+    .kpi-title { font-size: 14px; color: var(--text-muted); margin-bottom: 8px; }
+    .kpi-value { font-size: 28px; font-weight: bold; color: var(--primary-cyan-dark); }
+
+    .card { background-color: var(--card-bg); border-radius: 12px; padding: 20px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); margin-bottom: 25px; border: 1px solid var(--border-color); }
+    .card-header { font-size: 18px; font-weight: bold; color: var(--primary-cyan-dark); padding-bottom: 12px; margin-bottom: 15px; border-bottom: 2px solid var(--primary-cyan-light); display: flex; justify-content: space-between; align-items: center; }
+
+    .form-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 15px; }
+    .form-group { display: flex; flex-direction: column; gap: 6px; }
+    .form-group label { font-size: 13px; font-weight: 600; color: var(--text-main); }
+    .form-group input, .form-group select, .form-group textarea { padding: 10px; border: 1px solid var(--border-color); border-radius: 6px; font-size: 14px; }
+
+    .btn { padding: 10px 20px; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; transition: 0.2s; }
+    .btn-primary { background-color: var(--primary-cyan); color: white; }
+    .btn-primary:hover { background-color: var(--primary-cyan-dark); }
+    .btn-gold { background-color: var(--accent-gold); color: white; }
+    .btn-gold:hover { background-color: var(--accent-gold-dark); }
+    .btn-danger { background-color: #dc3545; color: white; }
+
+    table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+    th { background-color: var(--primary-cyan-light); color: var(--primary-cyan-dark); padding: 12px; text-align: right; font-size: 13px; }
+    td { padding: 12px; border-bottom: 1px solid var(--border-color); font-size: 13px; }
+
+    .checklist-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 15px; }
+    .check-group { background: var(--bg-gray); padding: 15px; border-radius: 8px; border: 1px solid var(--border-color); }
+    .check-group h4 { color: var(--accent-gold-dark); margin-bottom: 10px; border-bottom: 1px solid var(--border-color); padding-bottom: 5px; }
+    .check-item { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; font-size: 13px; }
+
+    .prescription-preview { border: 2px dashed var(--primary-cyan); padding: 25px; border-radius: 8px; background: #fff; margin-top: 15px; }
+    .presc-header { display: flex; justify-content: space-between; border-bottom: 2px solid var(--accent-gold); padding-bottom: 15px; margin-bottom: 15px; }
+    
+    .filter-bar { display: flex; gap: 15px; flex-wrap: wrap; background: var(--primary-cyan-light); padding: 15px; border-radius: 8px; margin-bottom: 20px; }
+    .filter-item { display: flex; flex-direction: column; gap: 5px; }
+    .filter-item label { font-size: 12px; font-weight: bold; color: var(--primary-cyan-dark); }
+
+    .preset-badge { background: var(--primary-cyan-light); color: var(--primary-cyan-dark); padding: 8px 12px; border-radius: 6px; cursor: pointer; border: 1px solid var(--primary-cyan); font-weight: bold; transition: 0.2s; font-size: 13px; display: inline-block; margin: 4px; }
+    .preset-badge:hover { background: var(--primary-cyan); color: white; }
+
+    @media print {
+      body * { visibility: hidden; }
+      .printable, .printable * { visibility: visible; }
+      .printable { position: absolute; left: 0; top: 0; width: 100%; }
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <div class="logo-container">
+      <div class="logo-circle">♂</div>
+      <div class="brand-title">
+        <h1>د. أحمد حمدي</h1>
+        <p>استشاري الصحة الجنسية وجراحات الذكورة والعقم</p>
+      </div>
+    </div>
+    <div><strong>نظام إدارة العيادات والمراكز الجراحية</strong></div>
+  </header>
+
+  <div class="branch-bar">
+    <span><strong>الفرع النشط حالياً:</strong></span>
+    <button class="branch-btn active" onclick="setBranch('محطة الرمل', this)">محطة الرمل</button>
+    <button class="branch-btn" onclick="setBranch('العامرية', this)">العامرية</button>
+    <button class="branch-btn" onclick="setBranch('المهندسين', this)">المهندسين</button>
+  </div>
+
+  <div class="main-layout">
+    <aside>
+      <button class="nav-btn active" onclick="switchTab('reception')">📌 الاستقبال والانتظار</button>
+      <button class="nav-btn" onclick="switchTab('doctor')">👨‍⚕️ كشف الطبيب والروشتة</button>
+      <button class="nav-btn" onclick="switchTab('surgeries')">🏥 إدارة وتنسيق العمليات</button>
+      <button class="nav-btn" onclick="switchTab('database')">🗄️ قاعدة بيانات المرضى الشاملة</button>
+    </aside>
+
+    <main>
+      <!-- KPIs -->
+      <div class="kpi-grid">
+        <div class="kpi-card">
+          <div class="kpi-title">مرضى اليوم بالفرع</div>
+          <div class="kpi-value" id="kpi-total">0</div>
+        </div>
+        <div class="kpi-card gold">
+          <div class="kpi-title">حالات الانتظار</div>
+          <div class="kpi-value" id="kpi-waiting">0</div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-title">إجمالي قاعدة البيانات</div>
+          <div class="kpi-value" id="kpi-db-total">0</div>
+        </div>
+        <div class="kpi-card gold">
+          <div class="kpi-title">طلبات العمليات</div>
+          <div class="kpi-value" id="kpi-surgeries">0</div>
+        </div>
+      </div>
+
+      <!-- Tab 1: Reception -->
+      <div id="reception" class="tab-content active">
+        <div class="card">
+          <div class="card-header">تسجيل مريض جديد بالحجز</div>
+          <form id="patient-form" onsubmit="addPatient(event)">
+            <div class="form-grid">
+              <div class="form-group"><label>الاسم بالكامل</label><input type="text" id="p-name" required></div>
+              <div class="form-group"><label>السن</label><input type="number" id="p-age" required></div>
+              <div class="form-group"><label>مدينة الإقامة</label><input type="text" id="p-city" required></div>
+              <div class="form-group"><label>رقم التليفون</label><input type="tel" id="p-phone" required></div>
+              <div class="form-group">
+                <label>الحالة الاجتماعية</label>
+                <select id="p-marital"><option>متزوج</option><option>أعزب</option></select>
+              </div>
+              <div class="form-group"><label>مدة الزواج</label><input type="text" id="p-marriage-duration"></div>
+              <div class="form-group"><label>سن الزوجة</label><input type="number" id="p-wife-age"></div>
+              <div class="form-group"><label>عدد الأولاد</label><input type="number" id="p-children" value="0"></div>
+              <div class="form-group">
+                <label>مدخن؟</label>
+                <select id="p-smoking"><option>لا</option><option>نعم</option></select>
+              </div>
+              <div class="form-group">
+                <label>طريقة التعرف على العيادة</label>
+                <select id="p-source">
+                  <option>فيسبوك</option><option>جوجل</option><option>تيك توك</option>
+                  <option>يوتيوب</option><option>فيزيتا</option><option>صديق</option><option>آخر</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label>تاريخ الحجز</label>
+                <input type="date" id="p-date" required>
+              </div>
+              <div class="form-group">
+                <label>نوع الحجز</label>
+                <select id="p-type"><option>كشف جديد</option><option>استشارة</option></select>
+              </div>
+            </div>
+            <br>
+            <button type="submit" class="btn btn-primary">إضافة لقائمة الانتظار وقاعدة البيانات</button>
+          </form>
+        </div>
+
+        <div class="card">
+          <div class="card-header">شاشة الانتظار والترتيب (Queue System)</div>
+          <table>
+            <thead>
+              <tr>
+                <th>الدور</th>
+                <th>الاسم</th>
+                <th>السن</th>
+                <th>الهاتف</th>
+                <th>النوع</th>
+                <th>طريقة التعرف</th>
+                <th>الحالة</th>
+                <th>إجراءات</th>
+              </tr>
+            </thead>
+            <tbody id="queue-table"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Tab 2: Doctor Panel -->
+      <div id="doctor" class="tab-content">
+        <div class="card">
+          <div class="card-header">التاريخ المرضي والتشخيص</div>
+          <div class="form-grid">
+            <div class="form-group"><label>اختر المريض</label><select id="doc-patient-select" onchange="loadPatientMedical()"></select></div>
+            <div class="form-group"><label>Present Hx (الشكوى الحالية)</label><textarea id="m-present"></textarea></div>
+            <div class="form-group"><label>Past Hx Medical (التاريخ الطبي)</label><textarea id="m-past"></textarea></div>
+            <div class="form-group"><label>Drugs / Surgery (الأدوية والعمليات)</label><textarea id="m-drugs"></textarea></div>
+            <div class="form-group"><label>Previous Evaluation (الفحوصات السابقة)</label><textarea id="m-prev"></textarea></div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-header">💊 البروتوكولات العلاجية المسبقة (Quick Prescription Presets)</div>
+          <p style="font-size: 13px; color: var(--text-muted); margin-bottom: 10px;">اضغط على البروتوكول المناسب لتنزيل العلاجات والجرعات مباشرة في الروشتة:</p>
+          <div>
+            <div class="preset-badge" onclick="applyPreset('sperm')">🧬 بروتوكول تحسين السائل المنوي (Sperm Boosting)</div>
+            <div class="preset-badge" onclick="applyPreset('ed')">⚡ بروتوكول ضعف الانتصاب (Erectile Dysfunction)</div>
+            <div class="preset-badge" onclick="applyPreset('prostatitis')">🩺 بروتوكول التهاب البروستاتا المزمن</div>
+            <div class="preset-badge" onclick="applyPreset('post_op')">✂️️ بروتوكول ما بعد العمليات الجراحية</div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-header">الروشتة الإلكترونية (e-Prescription)</div>
+          <div class="form-grid">
+            <div class="form-group"><label>اسم الدواء</label><input type="text" id="rx-drug"></div>
+            <div class="form-group"><label>الجرعة وطريقة الاستخدام</label><input type="text" id="rx-dose" placeholder="مثال: قرص يومياً بعد الفطور"></div>
+          </div>
+          <br>
+          <button class="btn btn-primary" onclick="addMedication()">إضافة دواء فردي</button>
+
+          <div id="prescription-paper" class="prescription-preview printable">
+            <div class="presc-header">
+              <div>
+                <h2>د. أحمد حمدي</h2>
+                <p>استشاري الصحة الجنسية وجراحات الذكورة والعقم</p>
+              </div>
+              <div style="text-align: left;">
+                <p><strong>التاريخ:</strong> <span id="rx-date"></span></p>
+                <p><strong>المريض:</strong> <span id="rx-patient-name">---</span></p>
+              </div>
+            </div>
+            <h3>الروشتة الطبية (Rx):</h3>
+            <ol id="rx-list" style="margin-right: 20px; margin-top: 10px; line-height: 1.8;"></ol>
+          </div>
+          <br>
+          <div style="display:flex; gap:10px;">
+            <button class="btn btn-gold" onclick="window.print()">طباعة الروشتة</button>
+            <button class="btn btn-danger" onclick="clearRx()">مسح الروشتة</button>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-header">طلب التحاليل والإشاعات السريع (Quick Lab Order)</div>
+          <div class="checklist-grid">
+            <div class="check-group">
+              <h4>Andrology</h4>
+              <div class="check-item"><input type="checkbox" value="Testosterone (total/free)" class="lab-chk"> Testosterone</div>
+              <div class="check-item"><input type="checkbox" value="LH" class="lab-chk"> LH</div>
+              <div class="check-item"><input type="checkbox" value="FSH" class="lab-chk"> FSH</div>
+              <div class="check-item"><input type="checkbox" value="Prolactin" class="lab-chk"> Prolactin</div>
+              <div class="check-item"><input type="checkbox" value="Estradiol" class="lab-chk"> Estradiol</div>
+            </div>
+
+            <div class="check-group">
+              <h4>Fertility</h4>
+              <div class="check-item"><input type="checkbox" value="Semen Analysis (CASA)" class="lab-chk"> Semen Analysis (CASA)</div>
+              <div class="check-item"><input type="checkbox" value="DNA fragmentation" class="lab-chk"> DNA fragmentation</div>
+              <div class="check-item"><input type="checkbox" value="Karyotyping" class="lab-chk"> Karyotyping</div>
+            </div>
+
+            <div class="check-group">
+              <h4>Clinical & Ultrasound</h4>
+              <div class="check-item"><input type="checkbox" value="Scrotal Doppler" class="lab-chk"> Scrotal Doppler</div>
+              <div class="check-item"><input type="checkbox" value="TRUS" class="lab-chk"> TRUS</div>
+            </div>
+          </div>
+          <br>
+          <button class="btn btn-gold" onclick="generateLabRequest()">توليد ورقة التحاليل والطباعة</button>
+
+          <div id="lab-request-paper" class="prescription-preview printable" style="display:none;">
+            <div class="presc-header">
+              <div>
+                <h2>د. أحمد حمدي</h2>
+                <p>استشاري الصحة الجنسية وجراحات الذكورة والعقم</p>
+              </div>
+              <div style="text-align: left;">
+                <p><strong>استمارة طلب تحاليل وفحوصات (Laboratory Request)</strong></p>
+                <p><strong>المريض:</strong> <span id="lab-patient-name">---</span></p>
+              </div>
+            </div>
+            <h3>الفحوصات المطلوبة:</h3>
+            <ul id="lab-print-list" style="margin-right: 20px; margin-top: 10px;"></ul>
+          </div>
+        </div>
+      </div>
+
+      <!-- Tab 3: Surgeries -->
+      <div id="surgeries" class="tab-content">
+        <div class="card">
+          <div class="card-header">إنشاء طلب عملية جراحية جديدة (Operation Request)</div>
+          <div class="form-grid">
+            <div class="form-group"><label>المريض</label><select id="surg-patient-select"></select></div>
+            <div class="form-group"><label>اسم العملية الجراحية</label><input type="text" id="surg-name" placeholder="مثال: جراحة دوالي الخصية ميكروسكوبياً"></div>
+            <div class="form-group"><label>المستشفى / المكان</label><input type="text" id="surg-hospital" placeholder="المستشفى التخصصي"></div>
+            <div class="form-group"><label>التاريخ المقترح</label><input type="date" id="surg-date"></div>
+          </div>
+          <br>
+          <button class="btn btn-primary" onclick="createSurgeryOrder()">تأكيد طلب العملية ونقلها للتنسيق</button>
+        </div>
+
+        <div class="card">
+          <div class="card-header">لوحة مُنسق العمليات الجراحية (Surgical Coordinator Panel)</div>
+          <table>
+            <thead>
+              <tr>
+                <th>المريض</th>
+                <th>العملية</th>
+                <th>الفرع/المستشفى</th>
+                <th>التاريخ</th>
+                <th>تحاليل Pre-Op</th>
+                <th>الحالة والتأكيد</th>
+              </tr>
+            </thead>
+            <tbody id="surgeries-table"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Tab 4: Patients Database -->
+      <div id="database" class="tab-content">
+        <div class="card">
+          <div class="card-header">🗄️ قاعدة بيانات المرضى الشاملة والبحث المتقدم</div>
+          
+          <div class="filter-bar">
+            <div class="filter-item">
+              <label>تصفية بحسب السنة</label>
+              <select id="db-filter-year" onchange="renderDatabaseTable()">
+                <option value="ALL">جميع السنين</option>
+                <option value="2026" selected>2026</option>
+                <option value="2025">2025</option>
+              </select>
+            </div>
+
+            <div class="filter-item">
+              <label>تصفية بحسب الشهر</label>
+              <select id="db-filter-month" onchange="renderDatabaseTable()">
+                <option value="ALL">جميع الشهور</option>
+                <option value="01">يناير (1)</option>
+                <option value="02">فبراير (2)</option>
+                <option value="03">مارس (3)</option>
+                <option value="04">أبريل (4)</option>
+                <option value="05">مايو (5)</option>
+                <option value="06">يونيو (6)</option>
+                <option value="07">يوليو (7)</option>
+                <option value="08">أغسطس (8)</option>
+                <option value="09">سبتمبر (9)</option>
+                <option value="10" selected>أكتوبر (10)</option>
+                <option value="11">نوفمبر (11)</option>
+                <option value="12">ديسمبر (12)</option>
+              </select>
+            </div>
+
+            <div class="filter-item">
+              <label>الفرع</label>
+              <select id="db-filter-branch" onchange="renderDatabaseTable()">
+                <option value="ALL">جميع الفروع</option>
+                <option value="محطة الرمل">محطة الرمل</option>
+                <option value="العامرية">العامرية</option>
+                <option value="المهندسين">المهندسين</option>
+              </select>
+            </div>
+
+            <div class="filter-item" style="flex: 1;">
+              <label>بحث باسم المريض أو الهاتف</label>
+              <input type="text" id="db-search-input" placeholder="اكتب للبحث السريع..." onkeyup="renderDatabaseTable()">
+            </div>
+          </div>
+
+          <table>
+            <thead>
+              <tr>
+                <th>التاريخ</th>
+                <th>اسم المريض</th>
+                <th>السن</th>
+                <th>الإقامة</th>
+                <th>الهاتف</th>
+                <th>الفرع</th>
+                <th>الحالة الاجتماعية</th>
+                <th>الزواج</th>
+                <th>الأبناء</th>
+                <th>المصدر</th>
+              </tr>
+            </thead>
+            <tbody id="db-table-body"></tbody>
+          </table>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <script>
+    let currentBranch = 'محطة الرمل';
+    
+    let patients = [
+      { id: 1, name: "أحمد حسين عبد العزيز", age: 32, city: "الإسكندرية", phone: "01060700335", branch: "محطة الرمل", marital: "متزوج", marriageDur: "سنتين", wifeAge: 28, children: 0, smoking: "لا", source: "فيسبوك", type: "كشف جديد", status: "في الانتظار", date: "2026-10-04" },
+      { id: 2, name: "محمود محمد علي", age: 40, city: "العامرية", phone: "01211241010", branch: "العامرية", marital: "متزوج", marriageDur: "5 سنوات", wifeAge: 35, children: 2, smoking: "نعم", source: "جوجل", type: "استشارة", status: "في الانتظار", date: "2026-10-02" },
+      { id: 3, name: "سامح إبراهيم", age: 29, city: "الجيزة", phone: "01012005091", branch: "المهندسين", marital: "أعزب", marriageDur: "-", wifeAge: 0, children: 0, smoking: "لا", source: "فيزيتا", type: "كشف جديد", status: "تم الكشف", date: "2026-09-15" }
+    ];
+
+    let surgeries = [
+      { patientName: "أحمد حسين عبد العزيز", surgName: "دوالي الخصية الميكروسكوبية", hospital: "مستشفى محطة الرمل", date: "2026-10-15", preOp: "مكتملة (CBC, PT, viral)", status: "مؤكدة" }
+    ];
+
+    let rxItems = [];
+
+    const presets = {
+      sperm: [
+        { drug: "L-Carnitine 1000mg", dose: "قرص مرتين يومياً بعد الاكل" },
+        { drug: "Coenzyme Q10 200mg", dose: "قرص واحد يومياً" },
+        { drug: "Zinc & Vitamin E", dose: "قرص يومياً مساءً" }
+      ],
+      ed: [
+        { drug: "Tadalafil 5mg", dose: "قرص واحد يومياً في نفس الموعد" },
+        { drug: "L-Arginine Plus", dose: "كبسولة مرتين يومياً" }
+      ],
+      prostatitis: [
+        { drug: "Tamsulosin 0.4mg", dose: "كبسولة واحدة بعد العشاء يومياً" },
+        { drug: "Ciprofloxacin 500mg", dose: "قرص كل 12 ساعة لمدة أسبوعين" },
+        { drug: "Anti-inflammatory / Decongestant", dose: "تحميلة واحدة مساءً" }
+      ],
+      post_op: [
+        { drug: "Cefuroxime 500mg", dose: "قرص كل 12 ساعة لمدة 5 أيام" },
+        { drug: "Ibuprofen 400mg", dose: "قرص عند اللزوم / بعد الأكل" },
+        { drug: "Alpha Chymotrypsin", dose: "قرص قبل الأكل بـ 30 دقيقة 3 مرات" }
+      ]
+    };
+
+    const todayStr = new Date().toISOString().split('T')[0];
+    document.getElementById('p-date').value = todayStr;
+    document.getElementById('rx-date').innerText = new Date().toLocaleDateString('ar-EG');
+
+    function setBranch(branch, btn) {
+      currentBranch = branch;
+      document.querySelectorAll('.branch-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      renderQueue();
+    }
+
+    function switchTab(tabId) {
+      document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+      document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+      document.getElementById(tabId).classList.add('active');
+      event.currentTarget.classList.add('active');
+      updateDoctorSelects();
+      if(tabId === 'database') renderDatabaseTable();
+    }
+
+    function addPatient(e) {
+      e.preventDefault();
+      const newP = {
+        id: Date.now(),
+        name: document.getElementById('p-name').value,
+        age: document.getElementById('p-age').value,
+        city: document.getElementById('p-city').value,
+        phone: document.getElementById('p-phone').value,
+        branch: currentBranch,
+        marital: document.getElementById('p-marital').value,
+        marriageDur: document.getElementById('p-marriage-duration').value || '-',
+        wifeAge: document.getElementById('p-wife-age').value || 0,
+        children: document.getElementById('p-children').value || 0,
+        smoking: document.getElementById('p-smoking').value,
+        source: document.getElementById('p-source').value,
+        type: document.getElementById('p-type').value,
+        status: "في الانتظار",
+        date: document.getElementById('p-date').value
+      };
+      patients.push(newP);
+      document.getElementById('patient-form').reset();
+      document.getElementById('p-date').value = todayStr;
+      renderQueue();
+      alert('تم إضافة المريض بنجاح!');
+    }
+
+    function renderQueue() {
+      const filtered = patients.filter(p => p.branch === currentBranch);
+      const tbody = document.getElementById('queue-table');
+      tbody.innerHTML = '';
+      
+      filtered.forEach((p, index) => {
+        tbody.innerHTML += `
+          <tr>
+            <td><strong>${index + 1}</strong></td>
+            <td>${p.name}</td>
+            <td>${p.age}</td>
+            <td>${p.phone}</td>
+            <td>${p.type}</td>
+            <td>${p.source}</td>
+            <td><span style="color: var(--primary-cyan-dark); font-weight: bold;">${p.status}</span></td>
+            <td>
+              <button class="btn btn-primary" style="padding: 4px 8px; font-size: 12px;" onclick="switchTab('doctor')">دخول العيادة</button>
+            </td>
+          </tr>
+        `;
+      });
+
+      document.getElementById('kpi-total').innerText = filtered.length;
+      document.getElementById('kpi-waiting').innerText = filtered.filter(p => p.status === 'في الانتظار').length;
+      document.getElementById('kpi-db-total').innerText = patients.length;
+      document.getElementById('kpi-surgeries').innerText = surgeries.length;
+    }
+
+    function renderDatabaseTable() {
+      const year = document.getElementById('db-filter-year').value;
+      const month = document.getElementById('db-filter-month').value;
+      const branch = document.getElementById('db-filter-branch').value;
+      const search = document.getElementById('db-search-input').value.toLowerCase();
+
+      const tbody = document.getElementById('db-table-body');
+      tbody.innerHTML = '';
+
+      const filtered = patients.filter(p => {
+        const pDate = new Date(p.date);
+        const pYear = pDate.getFullYear().toString();
+        const pMonth = (pDate.getMonth() + 1).toString().padStart(2, '0');
+
+        const matchYear = (year === 'ALL' || pYear === year);
+        const matchMonth = (month === 'ALL' || pMonth === month);
+        const matchBranch = (branch === 'ALL' || p.branch === branch);
+        const matchSearch = p.name.toLowerCase().includes(search) || p.phone.includes(search);
+
+        return matchYear && matchMonth && matchBranch && matchSearch;
+      });
+
+      filtered.forEach(p => {
+        tbody.innerHTML += `
+          <tr>
+            <td>${p.date}</td>
+            <td><strong>${p.name}</strong></td>
+            <td>${p.age}</td>
+            <td>${p.city}</td>
+            <td>${p.phone}</td>
+            <td>${p.branch}</td>
+            <td>${p.marital}</td>
+            <td>${p.marriageDur}</td>
+            <td>${p.children}</td>
+            <td>${p.source}</td>
+          </tr>
+        `;
+      });
+    }
+
+    function updateDoctorSelects() {
+      const docSel = document.getElementById('doc-patient-select');
+      const surgSel = document.getElementById('surg-patient-select');
+      docSel.innerHTML = '<option value="">-- اختر مريض --</option>';
+      surgSel.innerHTML = '<option value="">-- اختر مريض --</option>';
+
+      patients.forEach(p => {
+        docSel.innerHTML += `<option value="${p.id}">${p.name} (${p.branch})</option>`;
+        surgSel.innerHTML += `<option value="${p.name}">${p.name}</option>`;
+      });
+    }
+
+    function loadPatientMedical() {
+      const pId = document.getElementById('doc-patient-select').value;
+      const patient = patients.find(p => p.id == pId);
+      if(patient) {
+        document.getElementById('rx-patient-name').innerText = patient.name;
+        document.getElementById('lab-patient-name').innerText = patient.name;
+      }
+    }
+
+    function applyPreset(presetKey) {
+      if(presets[presetKey]) {
+        rxItems = [...rxItems, ...presets[presetKey]];
+        renderRx();
+      }
+    }
+
+    function addMedication() {
+      const drug = document.getElementById('rx-drug').value;
+      const dose = document.getElementById('rx-dose').value;
+      if(drug && dose) {
+        rxItems.push({ drug, dose });
+        renderRx();
+        document.getElementById('rx-drug').value = '';
+        document.getElementById('rx-dose').value = '';
+      }
+    }
+
+    function clearRx() {
+      rxItems = [];
+      renderRx();
+    }
+
+    function renderRx() {
+      const list = document.getElementById('rx-list');
+      list.innerHTML = '';
+      rxItems.forEach(item => {
+        list.innerHTML += `<li><strong>${item.drug}</strong>: ${item.dose}</li>`;
+      });
+    }
+
+    function generateLabRequest() {
+      const selected = [];
+      document.querySelectorAll('.lab-chk:checked').forEach(c => selected.push(c.value));
+      if(selected.length === 0) {
+        alert('برجاء اختيار تحاليل أو إشاعات أولاً');
+        return;
+      }
+      
+      const labPaper = document.getElementById('lab-request-paper');
+      const labList = document.getElementById('lab-print-list');
+      labList.innerHTML = '';
+      selected.forEach(s => labList.innerHTML += `<li>${s}</li>`);
+      labPaper.style.display = 'block';
+      window.print();
+    }
+
+    function createSurgeryOrder() {
+      const pName = document.getElementById('surg-patient-select').value;
+      const name = document.getElementById('surg-name').value;
+      const hospital = document.getElementById('surg-hospital').value;
+      const date = document.getElementById('surg-date').value;
+
+      if(pName && name) {
+        surgeries.push({
+          patientName: pName,
+          surgName: name,
+          hospital: hospital || currentBranch,
+          date: date || 'قيد التحديد',
+          preOp: 'مطلوبة (تحت المتابعة)',
+          status: 'معلقة'
+        });
+        renderSurgeries();
+        alert('تم نقل طلب العملية إلى قسم تنسيق العمليات الجراحية');
+      }
+    }
+
+    function renderSurgeries() {
+      const tbody = document.getElementById('surgeries-table');
+      tbody.innerHTML = '';
+      surgeries.forEach(s => {
+        tbody.innerHTML += `
+          <tr>
+            <td>${s.patientName}</td>
+            <td>${s.surgName}</td>
+            <td>${s.hospital}</td>
+            <td>${s.date}</td>
+            <td>${s.preOp}</td>
+            <td><strong style="color: var(--accent-gold-dark);">${s.status}</strong></td>
+          </tr>
+        `;
+      });
+    }
+
+    renderQueue();
+    renderSurgeries();
+  </script>
+</body>
+</html>
