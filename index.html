@@ -41,13 +41,14 @@
     .tab-content { display: none; }
     .tab-content.active { display: block; }
 
-    .kpi-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 15px; margin-bottom: 25px; }
-    .kpi-card { background-color: var(--card-bg); padding: 18px; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); border-top: 4px solid var(--primary-cyan); }
+    .kpi-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 15px; margin-bottom: 25px; }
+    .kpi-card { background-color: var(--card-bg); padding: 16px; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); border-top: 4px solid var(--primary-cyan); }
     .kpi-card.gold { border-top-color: var(--accent-gold); }
     .kpi-card.red { border-top-color: #dc3545; }
     .kpi-card.green { border-top-color: #28a745; }
-    .kpi-title { font-size: 13px; color: var(--text-muted); margin-bottom: 6px; }
-    .kpi-value { font-size: 24px; font-weight: bold; color: var(--primary-cyan-dark); }
+    .kpi-card.purple { border-top-color: #6f42c1; }
+    .kpi-title { font-size: 12px; color: var(--text-muted); margin-bottom: 6px; }
+    .kpi-value { font-size: 20px; font-weight: bold; color: var(--primary-cyan-dark); }
 
     .card { background-color: var(--card-bg); border-radius: 12px; padding: 20px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); margin-bottom: 25px; border: 1px solid var(--border-color); }
     .card-header { font-size: 18px; font-weight: bold; color: var(--primary-cyan-dark); padding-bottom: 12px; margin-bottom: 15px; border-bottom: 2px solid var(--primary-cyan-light); display: flex; justify-content: space-between; align-items: center; }
@@ -64,6 +65,7 @@
     .btn-gold:hover { background-color: var(--accent-gold-dark); }
     .btn-danger { background-color: #dc3545; color: white; }
     .btn-edit { background-color: #f39c12; color: white; padding: 5px 10px; font-size: 12px; border-radius: 4px; border: none; cursor: pointer; }
+    .btn-add-visit { background-color: #28a745; color: white; padding: 5px 10px; font-size: 12px; border-radius: 4px; border: none; cursor: pointer; }
 
     table { width: 100%; border-collapse: collapse; margin-top: 10px; }
     th { background-color: var(--primary-cyan-light); color: var(--primary-cyan-dark); padding: 12px; text-align: right; font-size: 13px; }
@@ -85,6 +87,8 @@
     .preset-badge:hover { background: var(--primary-cyan); color: white; }
 
     .operation-box { background: var(--accent-gold-light); border: 1px solid var(--accent-gold); padding: 15px; border-radius: 8px; margin-top: 10px; display: none; }
+    .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1000; justify-content: center; align-items: center; }
+    .modal-card { background: white; width: 90%; max-width: 500px; padding: 25px; border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.2); }
 
     @media print {
       body * { visibility: hidden; }
@@ -127,7 +131,7 @@
     </aside>
 
     <main>
-      <!-- KPIs الإحصائيات الشاملة والمالية -->
+      <!-- KPIs الإحصائيات الشاملة والمالية المفصلة -->
       <div class="kpi-grid">
         <div class="kpi-card">
           <div class="kpi-title">مرضى اليوم بالفرع</div>
@@ -142,15 +146,19 @@
           <div class="kpi-value" id="kpi-esteshara-count">0</div>
         </div>
         <div class="kpi-card green">
-          <div class="kpi-title">إجمالي الإيرادات</div>
-          <div class="kpi-value" id="kpi-income">0 ج.م</div>
+          <div class="kpi-title">دخل الكشف والإستشارات</div>
+          <div class="kpi-value" id="kpi-consult-income">0 ج.م</div>
+        </div>
+        <div class="kpi-card purple">
+          <div class="kpi-title">إيرادات العمليات الجراحية</div>
+          <div class="kpi-value" id="kpi-surgery-income">0 ج.م</div>
         </div>
         <div class="kpi-card red">
           <div class="kpi-title">إجمالي المصروفات</div>
           <div class="kpi-value" id="kpi-expenses">0 ج.م</div>
         </div>
         <div class="kpi-card green">
-          <div class="kpi-title">صافي الأرباح</div>
+          <div class="kpi-title">صافي الأرباح الكلية</div>
           <div class="kpi-value" id="kpi-net-profit">0 ج.م</div>
         </div>
       </div>
@@ -379,8 +387,46 @@
         </div>
       </div>
 
-      <!-- Tab 4: Financials & Expenses (إدارة المصروفات والأموال) -->
+      <!-- Tab 4: Financials & Expenses (إدارة المصروفات والأموال المنفصلة) -->
       <div id="financials" class="tab-content">
+        <!-- حسابات الكشوفات والاستشارات المنفصلة -->
+        <div class="card">
+          <div class="card-header">📊 حسابات الكشوفات والاستشارات المستقبلية والمحصلة</div>
+          <div class="form-grid">
+            <div class="form-group">
+              <label>إجمالي عدد الكشوفات</label>
+              <input type="text" id="fin-kashf-count" readonly style="font-weight:bold; background:#e6f6f9;">
+            </div>
+            <div class="form-group">
+              <label>إجمالي عدد الاستشارات</label>
+              <input type="text" id="fin-esteshara-count" readonly style="font-weight:bold; background:#e6f6f9;">
+            </div>
+            <div class="form-group">
+              <label>صافي المبالغ المحصلة (كشف + استشارة)</label>
+              <input type="text" id="fin-consult-total" readonly style="font-weight:bold; color:#28a745; background:#e6f6f9;">
+            </div>
+          </div>
+        </div>
+
+        <!-- حسابات العمليات المنفصلة -->
+        <div class="card" style="border-right: 5px solid #6f42c1;">
+          <div class="card-header" style="color:#6f42c1;">🏥 قسم حسابات العمليات الجراحية المستقلة</div>
+          <div class="form-grid">
+            <div class="form-group">
+              <label>إجمالي تكلفة العمليات المخططة</label>
+              <input type="text" id="fin-op-total-cost" readonly style="font-weight:bold;">
+            </div>
+            <div class="form-group">
+              <label>المبالغ المحصلة كـ (عرابين/مقدمات)</label>
+              <input type="text" id="fin-op-deposits" readonly style="font-weight:bold; color:#28a745;">
+            </div>
+            <div class="form-group">
+              <label>المبالغ المتبقية المطلوب تحصيلها</label>
+              <input type="text" id="fin-op-remainings" readonly style="font-weight:bold; color:#dc3545;">
+            </div>
+          </div>
+        </div>
+
         <div class="card">
           <div class="card-header">تسجيل المصروفات اليومية والبنود</div>
           <form id="expense-form" onsubmit="addExpense(event)">
@@ -492,6 +538,33 @@
     </main>
   </div>
 
+  <!-- Modal window: نافذة تابعة لإضافة زيارة جديدة لمريض حالي -->
+  <div id="addVisitModal" class="modal-overlay">
+    <div class="modal-card">
+      <h3 style="color:var(--primary-cyan-dark); margin-bottom: 15px;">➕ إضافة كشف / استشارة جديدة للمريض</h3>
+      <p id="modalPatientInfo" style="font-weight:bold; margin-bottom: 15px; font-size:14px;"></p>
+      
+      <form onsubmit="submitNewVisit(event)">
+        <input type="hidden" id="modalPatientKey">
+        <div class="form-group" style="margin-bottom:12px;">
+          <label>نوع الزيارة / الحجز الجديدة *</label>
+          <select id="modalVisitType">
+            <option value="كشف جديد">كشف جديد (500 ج.م)</option>
+            <option value="استشارة">استشارة (200 ج.م)</option>
+          </select>
+        </div>
+        <div class="form-group" style="margin-bottom:15px;">
+          <label>تاريخ الزيارة الجديدة *</label>
+          <input type="date" id="modalVisitDate" required>
+        </div>
+        <div style="display:flex; justify-content: flex-end; gap:10px;">
+          <button type="button" class="btn btn-danger" onclick="closeVisitModal()">إلغاء</button>
+          <button type="submit" class="btn btn-primary">تأكيد وتسجيل الزيارة</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
   <script>
     // -------------------------------------------------------------
     // إعدادات وتوصيل Firebase Realtime Database
@@ -540,6 +613,7 @@
     const todayStr = new Date().toISOString().split('T')[0];
     document.getElementById('p-date').value = todayStr;
     document.getElementById('exp-date').value = todayStr;
+    document.getElementById('modalVisitDate').value = todayStr;
     document.getElementById('rx-date').innerText = new Date().toLocaleDateString('ar-EG');
 
     // -------------------------------------------------------------
@@ -660,7 +734,6 @@
       };
 
       if (editKey) {
-        // تعديل بيانات المريض
         patientsRef.child(editKey).update(pData)
           .then(() => {
             alert('تم تعديل بيانات المريض بنجاح!');
@@ -668,7 +741,6 @@
           })
           .catch(err => alert('خطأ في التعديل: ' + err.message));
       } else {
-        // إضافة مريض جديد بكود فريد تلقائي
         const customCode = 'PAT-' + (1000 + patients.length + 1);
         pData.patientCode = customCode;
 
@@ -679,6 +751,59 @@
           })
           .catch(err => alert('حدث خطأ أثناء الحفظ: ' + err.message));
       }
+    }
+
+    // إضافة كشف/استشارة جديدة لمريض سابق البحث عنه
+    function openAddVisitModal(id) {
+      const p = patients.find(item => item.id === id);
+      if (!p) return;
+
+      document.getElementById('modalPatientKey').value = p.id;
+      document.getElementById('modalPatientInfo').innerText = 'المريض: ' + p.name + ' (' + (p.patientCode || p.id) + ')';
+      document.getElementById('addVisitModal').style.display = 'flex';
+    }
+
+    function closeVisitModal() {
+      document.getElementById('addVisitModal').style.display = 'none';
+    }
+
+    function submitNewVisit(e) {
+      e.preventDefault();
+      const pKey = document.getElementById('modalPatientKey').value;
+      const targetP = patients.find(item => item.id === pKey);
+      if(!targetP) return;
+
+      const visitType = document.getElementById('modalVisitType').value;
+      const visitDate = document.getElementById('modalVisitDate').value;
+      const paid = (visitType === 'كشف جديد') ? 500 : 200;
+
+      const newVisitData = {
+        name: targetP.name,
+        age: targetP.age,
+        city: targetP.city,
+        phone: targetP.phone,
+        branch: currentBranch,
+        marital: targetP.marital,
+        marriageDur: targetP.marriageDur,
+        wifeAge: targetP.wifeAge,
+        children: targetP.children,
+        smoking: targetP.smoking,
+        source: targetP.source,
+        patientCode: targetP.patientCode || ('PAT-' + Math.floor(Math.random()*1000)),
+        type: visitType,
+        status: "في الانتظار",
+        date: visitDate,
+        paid: paid,
+        remaining: 0,
+        totalCost: 0
+      };
+
+      patientsRef.push(newVisitData)
+        .then(() => {
+          alert('تم إضافة زيادة جديدة كـ (' + visitType + ') للمريض بنجاح!');
+          closeVisitModal();
+        })
+        .catch(err => alert('حدث خطأ: ' + err.message));
     }
 
     function editPatientData(id) {
@@ -747,18 +872,36 @@
       const filteredP = patients.filter(p => p.branch === currentBranch);
       const filteredE = expenses.filter(e => e.branch === currentBranch);
 
-      const kashfCount = filteredP.filter(p => p.type === 'كشف جديد').length;
-      const estesharaCount = filteredP.filter(p => p.type === 'استشارة').length;
+      // كشوفات واستشارات
+      const kashfList = filteredP.filter(p => p.type === 'كشف جديد');
+      const estesharaList = filteredP.filter(p => p.type === 'استشارة');
+      const consultIncome = kashfList.reduce((sum, p) => sum + (p.paid || 0), 0) + estesharaList.reduce((sum, p) => sum + (p.paid || 0), 0);
 
-      const totalIncome = filteredP.reduce((sum, p) => sum + (p.paid || 0), 0);
+      // عمليات جراحية
+      const opList = filteredP.filter(p => p.type === 'عملية جراحية');
+      const opTotalCost = opList.reduce((sum, p) => sum + (p.totalCost || 0), 0);
+      const opDeposits = opList.reduce((sum, p) => sum + (p.paid || 0), 0);
+      const opRemainings = opList.reduce((sum, p) => sum + (p.remaining || 0), 0);
+
+      const totalIncome = consultIncome + opDeposits;
       const totalExpenses = filteredE.reduce((sum, e) => sum + (e.amount || 0), 0);
       const netProfit = totalIncome - totalExpenses;
 
-      document.getElementById('kpi-kashf-count').innerText = kashfCount;
-      document.getElementById('kpi-esteshara-count').innerText = estesharaCount;
-      document.getElementById('kpi-income').innerText = totalIncome.toLocaleString() + ' ج.م';
+      document.getElementById('kpi-kashf-count').innerText = kashfList.length;
+      document.getElementById('kpi-esteshara-count').innerText = estesharaList.length;
+      document.getElementById('kpi-consult-income').innerText = consultIncome.toLocaleString() + ' ج.م';
+      document.getElementById('kpi-surgery-income').innerText = opDeposits.toLocaleString() + ' ج.م';
       document.getElementById('kpi-expenses').innerText = totalExpenses.toLocaleString() + ' ج.م';
       document.getElementById('kpi-net-profit').innerText = netProfit.toLocaleString() + ' ج.م';
+
+      // تفاصيل شاشة المصروفات والمالية
+      document.getElementById('fin-kashf-count').value = kashfList.length + ' كشف (بقيمة ' + (kashfList.length * 500) + ' ج.م)';
+      document.getElementById('fin-esteshara-count').value = estesharaList.length + ' استشارة (بقيمة ' + (estesharaList.length * 200) + ' ج.م)';
+      document.getElementById('fin-consult-total').value = consultIncome.toLocaleString() + ' ج.م';
+
+      document.getElementById('fin-op-total-cost').value = opTotalCost.toLocaleString() + ' ج.م';
+      document.getElementById('fin-op-deposits').value = opDeposits.toLocaleString() + ' ج.م';
+      document.getElementById('fin-op-remainings').value = opRemainings.toLocaleString() + ' ج.م';
     }
 
     function renderQueue() {
@@ -780,6 +923,7 @@
             <td>
               <button class="btn btn-primary" style="padding: 4px 8px; font-size: 12px;" onclick="switchTab('doctor')">دخول العيادة</button>
               <button class="btn-edit" onclick="editPatientData('${p.id}')">تعديل</button>
+              <button class="btn-add-visit" onclick="openAddVisitModal('${p.id}')">➕ زيارة جديدة</button>
             </td>
           </tr>
         `;
@@ -841,7 +985,8 @@
             <td><strong style="color: #28a745;">${p.paid || 0} ج.م</strong></td>
             <td><strong style="color: #dc3545;">${p.remaining || 0} ج.م</strong></td>
             <td>
-              <button class="btn-edit" onclick="editPatientData('${p.id}')">تعديل البيانات</button>
+              <button class="btn-edit" onclick="editPatientData('${p.id}')">تعديل</button>
+              <button class="btn-add-visit" onclick="openAddVisitModal('${p.id}')">➕ زيارة جديدة</button>
             </td>
           </tr>
         `;
