@@ -219,7 +219,7 @@
             <div class="preset-badge" onclick="applyPreset('sperm')">🧬 بروتوكول تحسين السائل المنوي (Sperm Boosting)</div>
             <div class="preset-badge" onclick="applyPreset('ed')">⚡ بروتوكول ضعف الانتصاب (Erectile Dysfunction)</div>
             <div class="preset-badge" onclick="applyPreset('prostatitis')">🩺 بروتوكول التهاب البروستاتا المزمن</div>
-            <div class="preset-badge" onclick="applyPreset('post_op')">✂️️ بروتوكول ما بعد العمليات الجراحية</div>
+            <div class="preset-badge" onclick="applyPreset('post_op')">✂ بروتوكول ما بعد العمليات الجراحية</div>
           </div>
         </div>
 
@@ -405,16 +405,9 @@
   <script>
     let currentBranch = 'محطة الرمل';
     
-    let patients = [
-      { id: 1, name: "أحمد حسين عبد العزيز", age: 32, city: "الإسكندرية", phone: "01060700335", branch: "محطة الرمل", marital: "متزوج", marriageDur: "سنتين", wifeAge: 28, children: 0, smoking: "لا", source: "فيسبوك", type: "كشف جديد", status: "في الانتظار", date: "2026-10-04" },
-      { id: 2, name: "محمود محمد علي", age: 40, city: "العامرية", phone: "01211241010", branch: "العامرية", marital: "متزوج", marriageDur: "5 سنوات", wifeAge: 35, children: 2, smoking: "نعم", source: "جوجل", type: "استشارة", status: "في الانتظار", date: "2026-10-02" },
-      { id: 3, name: "سامح إبراهيم", age: 29, city: "الجيزة", phone: "01012005091", branch: "المهندسين", marital: "أعزب", marriageDur: "-", wifeAge: 0, children: 0, smoking: "لا", source: "فيزيتا", type: "كشف جديد", status: "تم الكشف", date: "2026-09-15" }
-    ];
-
-    let surgeries = [
-      { patientName: "أحمد حسين عبد العزيز", surgName: "دوالي الخصية الميكروسكوبية", hospital: "مستشفى محطة الرمل", date: "2026-10-15", preOp: "مكتملة (CBC, PT, viral)", status: "مؤكدة" }
-    ];
-
+    // مصفوفات فارغة بالكامل للعمل الفعلي
+    let patients = [];
+    let surgeries = [];
     let rxItems = [];
 
     const presets = {
